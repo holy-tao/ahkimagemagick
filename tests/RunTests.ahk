@@ -5,11 +5,14 @@
 #Include ./YUnit/JUnit.ahk
 #Include ./YUnit/Stdout.ahk
 
-#Include FileExtensions.Test.ahk
-#Include ArrayExtensions.Test.ahk
+#Include ./MagickWandSmoke.tests.ahk
+#Include ./MagickWandImageManipulationSmoke.tests.ahk
+
+FileAppend("Starting unit tests using ImageMagick version " MagickWand.LibVersion "`n", "*")
 
 YUnit.Use(YunitResultCounter, YUnitJUnit, YUnitStdOut).Test(
-	; Add test classes here
+	MagickWandSmokeTests,
+	MagickWandImageManipulationTests
 )
 
 Exit(-YunitResultCounter.failures)
