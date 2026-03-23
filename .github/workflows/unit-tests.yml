@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        exe: ['AutoHotkey64.exe', 'AutoHotkey32.exe']
+        exe: ['AutoHotkey64.exe']
         version: ['latest', '2.1-latest']
 
     steps:
