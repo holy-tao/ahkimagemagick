@@ -7,30 +7,37 @@ on:
 
 jobs:
   test:
-    name: Unit Tests
+    name: Unit Tests (${{ matrix.exe }} - ${{ matrix.version }})
     runs-on: windows-latest
     permissions:
       contents: read
       checks: write
       pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        exe: ['AutoHotkey64.exe']
+        version: ['latest', '2.1-latest']
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
         with:
           submodules: recursive
-          
+      
       - name: Install ImageMagick
         shell: pwsh
         run: winget install ImageMagick.Q16-HDRI --silent --accept-package-agreements --accept-source-agreements
 
       - name: Install AutoHotkey V2
-        uses: holy-tao/install-autohotkey@v1
+        uses: holy-tao/install-autohotkey@v2.0.0
+        with:
+          version: ${{ matrix.version }}
 
       - name: Run Unit Tests
         working-directory: tests
         shell: powershell
-        run: AutoHotkey64.exe /ErrorStdOut RunTests.ahk
+        run: ${{ matrix.exe }} /ErrorStdOut RunTests.ahk
 
       - name: Publish Test Results
         if: always()
@@ -38,6 +45,14 @@ jobs:
         with:
           report_paths: tests/junit.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          detailed_summary: true
-          include_time_in_summary: true
-          include_passed: true
+          check_name: Test Results (${{ matrix.exe }} - ${{ matrix.version }})
+
+  all-tests-passed:
+    name: All Tests Passed
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+    steps:
+      - name: Fail if any matrix job failed
+        if: needs.test.result != 'success'
+        run: exit 1
